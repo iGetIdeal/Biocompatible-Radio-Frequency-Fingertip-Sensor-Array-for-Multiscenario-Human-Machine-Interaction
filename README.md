@@ -4,8 +4,6 @@ This repository serves as the official code appendix for the paper **"Biocompati
 
 ## Project Structure
 
-The repository is organized to separate data, models, source code, and applications, ensuring clarity and reproducibility.
-
 ```
 .
 ├── 📂 data/
@@ -30,88 +28,116 @@ The repository is organized to separate data, models, source code, and applicati
 │   │   └── 📄 morse_code_translator.py
 │   │
 │   └── 📂 robotic_arm_controller/
-│       └── 📄 robotic_arm_controller.py
+│       ├── 📄 robotic_arm_controller.py
+│       └── 📂 stm32_keil_project/
+│           ├── 📂 CORE/
+│           ├── 📂 STM32F10x_FWLib/
+│           ├── 📂 USER/
+│           ├── 📄 OpenArmSTM32.uvoptx
+│           └── 📄 OpenArmSTM32.uvprojx
 │
-└── 📄 README.md
+├── 📄 README.md
+└── 📄 requirements.txt
 ```
 
-- **`/data`**: Contains the dataset (`training_set.xlsx`) used for training and evaluating the model.
+## Modules Description
 
-- `/models`
+### data/
 
-  : Contains the pre-trained model files. These are the outputs of the training script.
+Contains the dataset used for training the neural network.
 
-  - `bp_net_model.pth`: The saved state dictionary of the trained PyTorch neural network.
-  - `scaler.joblib`: The saved `StandardScaler` object for normalizing input features.
-  - `label_encoder.joblib`: The saved `LabelEncoder` object for handling class labels.
+- `training_set.xlsx`: The raw data for model training.
 
-- `/src`
+### models/
 
-  : Contains the core source code for model training.
+Stores the pre-trained machine learning model and associated data processors.
 
-  - `train_model.py`: The script to train the BP neural network from scratch using the data in `/data` and save the resulting artifacts into `/models`.
+- `bp_net_model.pth`: The trained PyTorch model weights.
+- `scaler.joblib`: The fitted StandardScaler for normalizing input data.
+- `label_encoder.joblib`: The fitted LabelEncoder for converting between numerical predictions and class labels.
 
-- **`/applications`**: Contains standalone Python scripts that load the pre-trained models from `/models` to perform specific tasks. Each sub-folder represents a distinct application.
+###  src/
+
+Source code for model training.
+
+- `train_model.py`: The Python script used to train the BP neural network and save the model files.
+
+### applications/
+
+Contains the standalone applications that utilize the trained model.
+
+#### car_game_controller/
+
+A virtual car simulation powered by the BP network.
+
+- `car_game_controller.py`: The main script that reads data, predicts commands, and controls the car in a Pygame window.
+- `assets/`: Contains image files for the game.
+
+#### Morse Code Translator
+
+A simple command-line tool for Morse code.
+
+- `morse_code_translator.py`: The script for translation logic.
+
+#### robotic_arm_controller/
+
+A dual-component system for controlling a physical robotic arm.
+
+- `robotic_arm_controller.py`: The Python host script that runs on a PC. It handles model inference and sends control commands via serial communication.
+- `stm32_keil_project/`: The embedded firmware for the STM32 microcontroller. This Keil MDK-ARM v5 project receives commands from the host and actuates the arm's motors.
 
 ------
 
-## Requirements
+## Installation and Usage
 
-**Python Version:** This project requires **Python 3.10 or newer**. This is because the `pygame` library, a core dependency for the `car_game_controller` application, requires a modern version of Python.
+### 1. Prerequisites
 
-**Dependencies:** You will also need the following Python libraries. The `pyserial` package is required for the `robotic_arm_controller`.
+- Python 3.10+
+- Keil MDK-ARM (v5 or later) for the embedded project.
 
-You can install all required dependencies using a single `pip` command:
+### 2. Setup
 
-```bash
-pip install torch pandas scikit-learn joblib numpy pygame pyserial openpyxl
+Clone the repository and install the required Python packages:
+
+```
+git clone https://your-repository-url/
+cd your-repository-name/
+pip install -r requirements.txt
 ```
 
-It is recommended to create a virtual environment to manage these dependencies.
+### 3. Model Training (Optional)
 
-------
+The repository includes pre-trained models. However, if you wish to retrain the model on your own data, run the training script:
 
-## Usage Guide
-
-This project allows for both re-training the model and running applications with the provided pre-trained models.
-
-### 1. Re-training the Model
-
-If you wish to re-train the model from scratch, you can run the training script.
-
-**Note:** Running this script will overwrite the existing files in the `/models` directory.
-
-From the project root directory, execute the following command:
-
-```bash
+```
 python src/train_model.py
 ```
 
-The script will load `data/training_set.xlsx`, train the model, and save the new model, scaler, and encoder to the `/models` directory.
+### 4. Running the Applications
 
-### 2. Running the Applications
+**Virtual Car Controller:**
 
-The pre-trained models are located in the `/models` directory, allowing you to run the applications directly. Each application script is self-contained and loads the necessary model files.
+```
+python applications/car_game_controller/car_game_controller.py
+```
 
-From the project root directory, run the desired application using one of the following commands:
+**Morse Code Translator:**
 
-- **Car Game Controller:**
+```
+python applications/morse_code_translator/morse_code_translator.py
+```
 
-  ```bash
-  python applications/car_game_controller/car_game_controller.py
-  ```
+**Robotic Arm Controller:**
 
-- **Morse Code Translator:**
+1. **Flash Firmware**: Open the `applications/robotic_arm_controller/stm32_keil_project/OpenArmSTM32.uvprojx` project in Keil MDK, compile it, and flash the firmware to your STM32 hardware.
 
-  ```bash
-  python applications/morse_code_translator/morse_code_translator.py
-  ```
+2. Run Host Script
 
-- **Robotic Arm Controller:**
+   : Connect the hardware to your PC and run the host controller script. You may need to configure the serial port within the script.
 
-  ```bash
-  python applications/robotic_arm_controller/robotic_arm_controller.py
-  ```
+   ```
+   python applications/robotic_arm_controller/robotic_arm_controller.py
+   ```
 
 ------
 
